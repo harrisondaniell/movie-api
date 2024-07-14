@@ -1,4 +1,5 @@
-import express from "express";
+import express, { urlencoded } from "express";
+import { Request, Response } from "express";
 
 import { PrismaClient } from "@prisma/client";
 
@@ -6,7 +7,11 @@ const port = 3000;
 const app = express();
 const prisma = new PrismaClient();
 
-app.get("/movies", async (req, res) => {
+app.use(urlencoded({ extended: true }));
+app.disable("x-powered-by");
+app.use(express.json());
+
+app.get("/movies", async (req: Request, res: Response) => {
   const movie = await prisma.movie.findMany({
     orderBy: {
       title: "asc",
@@ -17,6 +22,24 @@ app.get("/movies", async (req, res) => {
     },
   });
   res.json(movie);
+});
+
+app.post("/movies", async (req: Request, res: Response) => {
+  const { title, genre_id, language_id, oscar_count, release_date } = req.body;
+  try {
+    await prisma.movie.create({
+      data: {
+        title,
+        genre_id,
+        language_id,
+        oscar_count,
+        release_date: new Date(release_date),
+      },
+    });
+  } catch (error) {
+    return res.status(500).send({ message: "Falha ao cadastrar um filme" });
+  }
+  res.status(201).send(req.body.title);
 });
 
 app.listen(port, () => {
