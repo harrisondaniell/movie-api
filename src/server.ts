@@ -87,6 +87,34 @@ app.put("/movies/:id", async (req: Request, res: Response) => {
   }
 });
 
+app.delete("/movies/:id", async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+
+  const verifyMovie = await prisma.movie.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  try {
+    if (!verifyMovie) {
+      return res.status(404).send({ message: "O filme não foi encontrado" });
+    }
+
+    const movie = await prisma.movie.delete({
+      where: {
+        id,
+      },
+    });
+
+    return res.status(200).send(movie);
+  } catch (error) {
+    return res
+      .status(500)
+      .send({ message: "Não foi possível remover o filme" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
