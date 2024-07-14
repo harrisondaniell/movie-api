@@ -1,10 +1,12 @@
 import express, { urlencoded } from "express";
 import { Request, Response } from "express";
-
 import { PrismaClient } from "@prisma/client";
+import swaggerUI from "swagger-ui-express";
+import swaggerDocument from "../swagger.json";
 
 const port = 3000;
 const app = express();
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 const prisma = new PrismaClient();
 
 app.use(urlencoded({ extended: true }));
